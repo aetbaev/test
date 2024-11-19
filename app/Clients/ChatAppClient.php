@@ -11,6 +11,8 @@ class ChatAppClient
 {
     private string $accessToken;
 
+    private int $licenseId;
+
     private string $baseUrl = 'https://api.chatapp.online';
 
     public function __construct(private ClientInterface $client)
@@ -47,8 +49,44 @@ class ChatAppClient
         throw new Exception('Authorization failed');
     }
 
-    public function setAccessToken(string $accessToken)
+    /**
+     * @throws GuzzleException
+     * @throws Exception
+     */
+    public function sendMessage($phone, $text): array
+    {
+        $url = $this->baseUrl . "/v1/licenses/{$this->licenseId}/messengers/grWhatsApp/chats/{$phone}/messages/text";
+
+        $response = $this->client->post(
+            $url,
+            [
+                'headers' => [
+                    'Authorization' => $this->accessToken,
+                ],
+                'json' => [
+                    'text' => $text,
+                ],
+            ]);
+
+        if ($response->getStatusCode() == 200) {
+            $body = $response->getBody();
+            $data = Arr::get(json_decode((string)$body, true), 'data');
+
+            if (!empty($data)) {
+                return $data;
+            }
+        }
+
+        throw new Exception('Failed to send message');
+    }
+
+    public function setAccessToken(string $accessToken): void
     {
         $this->accessToken = $accessToken;
+    }
+
+    public function licenseId(int $licenseId): void
+    {
+        $this->licenseId = $licenseId;
     }
 }
