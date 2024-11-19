@@ -9,7 +9,7 @@ return new class extends Migration {
     {
         Schema::create('tokens', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('cabinet_user_id')->unique();
+            $table->unsignedBigInteger('cabinet_user_id');
             $table->string('access_token');
             $table->timestamp('access_token_end_time');
             $table->string('refresh_token');

@@ -8,6 +8,7 @@ use App\Models\Broadcast;
 use App\Models\BroadcastRecipient;
 use App\Models\Token;
 use Exception;
+use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Http\Request;
 
 class ChatAppService
@@ -77,5 +78,21 @@ class ChatAppService
         }
 
         return $broadcastRecipient->refresh();
+    }
+
+    /**
+     * @throws GuzzleException
+     */
+    public function refreshAccessToken(string $refreshToken): Token
+    {
+        $data = $this->client->refreshAccessToken($refreshToken);
+
+        return Token::create([
+            'cabinet_user_id' => $data['cabinetUserId'],
+            'access_token' => $data['accessToken'],
+            'access_token_end_time' => $data['accessTokenEndTime'],
+            'refresh_token' => $data['refreshToken'],
+            'refresh_token_end_time' => $data['refreshTokenEndTime'],
+        ]);
     }
 }

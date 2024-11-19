@@ -53,6 +53,32 @@ class ChatAppClient
      * @throws GuzzleException
      * @throws Exception
      */
+    public function refreshAccessToken(string $refreshToken): array
+    {
+        $response = $this->client->post($this->baseUrl . '/v1/tokens/refresh',
+            [
+                'headers' => [
+                    'Lang' => 'en',
+                    'Refresh' => $refreshToken,
+                ],
+            ]);
+
+        if ($response->getStatusCode() == 200) {
+            $body = $response->getBody();
+            $data = Arr::get(json_decode((string)$body, true), 'data');
+
+            if (!empty($data)) {
+                return $data;
+            }
+        }
+
+        throw new Exception('Unable to refresh access token');
+    }
+
+    /**
+     * @throws GuzzleException
+     * @throws Exception
+     */
     public function sendMessage($phone, $text): array
     {
         $url = $this->baseUrl . "/v1/licenses/{$this->licenseId}/messengers/grWhatsApp/chats/{$phone}/messages/text";
